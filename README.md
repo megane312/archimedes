@@ -88,6 +88,17 @@ sudo ./run_test.sh
 			```
 		- プロトコル: シンプルな JSON。例: `{"type":"hat","value":[0,1]}` や `{"type":"axes","a7":1,"a8":0}`。
 
+	- Alternate setup: Pi polls a PC server (Pi as client)
+		- If your networking setup makes it easier for the Pi to poll the PC (for example when the PC is behind a VPN/NAT), you can run a lightweight HTTP server on the PC which exposes the controller state at `GET /state` and run a polling client on the Pi.
+		- PC (server): `tools/joy_server.py` — reads joystick with pygame and serves JSON at `/state`.
+			```bash
+			PYTHONPATH=. python3 tools/joy_server.py --host 0.0.0.0 --port 8000
+			```
+		- Pi (client): `tools/drive_pull_client.py` — polls the PC `/state` endpoint and applies commands.
+			```bash
+			sudo PYTHONPATH=. python3 tools/drive_pull_client.py --url http://<PC_IP>:8000/state --interval 0.1
+			```
+
 
 - テスト:
 	- 単体のマッピング関数に対する簡易テストを `tests/test_compute_motor_commands.py` に追加しています。ワークスペースのルートで実行できます:
