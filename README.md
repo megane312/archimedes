@@ -75,6 +75,20 @@ sudo ./run_test.sh
 		```
 	- `tools/dir_toggle.py` : 単純に DIR を切り替えながら PWM を出力する短い診断スクリプト。
 
+	- ネットワーク経由での遠隔制御（送受信分離）:
+		- `tools/drive_server.py` : Raspberry Pi 側で動作する UDP サーバ。JSON メッセージを受け取り、モータを制御します。
+			```bash
+			# Pi 側で実行
+			sudo PYTHONPATH=. python3 tools/drive_server.py --bind 0.0.0.0 --port 5005
+			```
+		- `tools/joy_net_client.py` : ノートPC側で動作するクライアント。pygame でコントローラ入力を読み、UDP で Pi に送信します。
+			```bash
+			# ノートPC側で実行（--host に Pi のIP）
+			PYTHONPATH=. python3 tools/joy_net_client.py --host 192.168.1.50 --port 5005
+			```
+		- プロトコル: シンプルな JSON。例: `{"type":"hat","value":[0,1]}` や `{"type":"axes","a7":1,"a8":0}`。
+
+
 - テスト:
 	- 単体のマッピング関数に対する簡易テストを `tests/test_compute_motor_commands.py` に追加しています。ワークスペースのルートで実行できます:
 		```bash
