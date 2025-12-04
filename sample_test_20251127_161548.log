@@ -1,0 +1,12 @@
+Starting sample.py demo at 2025年 11月 27日 木曜日 16:15:48 JST
+Traceback (most recent call last):
+  File "/home/archimedes/ドキュメント/./sample.py", line 158, in <module>
+    main()
+    ~~~~^^
+  File "/home/archimedes/ドキュメント/./sample.py", line 134, in main
+    demo_sequence(GPIO)
+    ~~~~~~~~~~~~~^^^^^^
+  File "/home/archimedes/ドキュメント/./sample.py", line 96, in demo_sequence
+    gpio.setup(DIR_PIN, GPIO.OUT)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+RuntimeError: Cannot determine SOC peripheral base address

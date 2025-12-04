@@ -1,0 +1,35 @@
+Starting sample.py demo at 2025年 11月 27日 木曜日 16:35:18 JST
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Can't connect to pigpio at localhost(8888)
+
+Did you start the pigpio daemon? E.g. sudo pigpiod
+
+Did you specify the correct Pi host/port in the environment
+variables PIGPIO_ADDR/PIGPIO_PORT?
+E.g. export PIGPIO_ADDR=soft, export PIGPIO_PORT=8888
+
+Did you specify the correct Pi host/port in the
+pigpio.pi() function? E.g. pigpio.pi('soft', 8888)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[INFO] pigpio module present but pigpiod not running; skipping pigpio backend
+[INFO] GPIO runtime verification failed: Cannot determine SOC peripheral base address; switching to FAKE GPIO.
+[INFO] using GPIO backend: fake
+[FAKE GPIO] setmode(BCM)
+[FAKE GPIO] setup(pin=17, mode=OUT)
+[FAKE GPIO] setup(pin=18, mode=OUT)
+[FAKE PWM] start pin=18 freq=1000 duty=0
+正転 50%
+[FAKE GPIO] output(pin=17, value=1)
+[FAKE PWM] ChangeDutyCycle pin=18 -> duty=50
+停止
+[FAKE GPIO] output(pin=17, value=1)
+[FAKE PWM] ChangeDutyCycle pin=18 -> duty=0
+逆転 80%
+[FAKE GPIO] output(pin=17, value=0)
+[FAKE PWM] ChangeDutyCycle pin=18 -> duty=80
+停止
+[FAKE GPIO] output(pin=17, value=1)
+[FAKE PWM] ChangeDutyCycle pin=18 -> duty=0
+[FAKE PWM] stop pin=18
+[FAKE GPIO] cleanup()
+Finished at 2025年 11月 27日 木曜日 16:35:23 JST

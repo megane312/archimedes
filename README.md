@@ -47,3 +47,38 @@ sudo ./run_test.sh
 - `ImportError: No module named RPi.GPIO` の場合は上記インストール手順を実行してください。
 
 結果を共有する際は生成されたログファイルの内容（特に例外トレース）を貼ってください。こちらで次の調整を案内します。
+
+短い追記: コントローラ駆動・診断ツールについて
+---------------------------------
+
+このリポジトリにはコントローラ操作とハードウェア診断を補助するスクリプトを追加しています。簡単な使い方を以下に示します。
+
+- コントローラ駆動モード (`robot_drive.py`):
+	- ジョイスティックのハット（D-pad）を優先してモータ制御します。デフォルトで `hats[0]` の値で前進/後退/左右旋回を行います。
+	- 起動方法（推奨: 非 root でまず試す）:
+		```bash
+		PYTHONPATH=. python3 robot_drive.py --controller
+		# あるいは権限が必要な場合
+		sudo PYTHONPATH=. python3 robot_drive.py --controller
+		```
+	- 軸インデックスを変える場合は `--axis7` / `--axis8` を指定します（既存の軸フォールバックが動作します）。
+	- DIR 極性が逆の場合は `--invert-dir` を付けて反転できます。
+
+- 診断ツール (`tools/`):
+	- `tools/joy_inspect.py` : ジョイスティックの軸・ボタン・ハットのインデックスと値を時刻付きで表示します（コントローラの割当確認に便利）。
+		```bash
+		PYTHONPATH=. python3 tools/joy_inspect.py --duration 30
+		```
+	- `tools/pwm_probe.py` : 指定モータに対して時刻付きで PWM/DIR を出力するプローブ。マルチメータ/オシロで信号を観測する際に使います。
+		```bash
+		sudo PYTHONPATH=. python3 tools/pwm_probe.py
+		```
+	- `tools/dir_toggle.py` : 単純に DIR を切り替えながら PWM を出力する短い診断スクリプト。
+
+- テスト:
+	- 単体のマッピング関数に対する簡易テストを `tests/test_compute_motor_commands.py` に追加しています。ワークスペースのルートで実行できます:
+		```bash
+		PYTHONPATH=. python3 tests/test_compute_motor_commands.py
+		```
+
+注意: モータドライバ（MD10C 等）やモータの電源仕様を必ず確認してください。高デューティで両モータを同時に駆動すると大電流が流れるため配線や電源容量に注意が必要です。
