@@ -1,0 +1,20 @@
+[Unit]
+Description=Drive Pull Client (drive_pull_client.py)
+After=network.target
+
+[Service]
+Type=simple
+User=%USER%
+WorkingDirectory=%REPO_DIR%
+Environment=PYTHONPATH=%REPO_DIR%
+ExecStart=/usr/bin/sudo -n %REPO_DIR%/venv/bin/python3 %REPO_DIR%/tools/drive_pull_client.py --url http://<PC_IP>:8000/state --interval 0.1
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+# Notes:
+# - This service template runs the Pi-side poll client and expects the script
+#   to be invoked with root privileges (many GPIO backends need sudo). Replace
+#   %USER% and %REPO_DIR% with values appropriate for your system and set
+#   <PC_IP> to the controller PC's IP.

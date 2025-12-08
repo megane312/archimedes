@@ -99,6 +99,28 @@ sudo ./run_test.sh
 			sudo PYTHONPATH=. python3 tools/drive_pull_client.py --url http://<PC_IP>:8000/state --interval 0.1
 			```
 
+		PC Setup (quick)
+		-----------------
+
+		If you want a quick reproducible environment on your laptop, run the provided setup script from the repository root. It will create a virtualenv at `~/archimedes/venv` and install the minimal dependencies.
+
+		```bash
+		cd /home/archimedes/ドキュメント
+		bash tools/setup_pc.sh
+
+		# Activate the virtualenv before running joystick tools:
+		source ~/archimedes/venv/bin/activate
+
+		# Start joystick HTTP server (allow Pi to poll):
+		PYTHONPATH=. python3 tools/joy_server.py --host 0.0.0.0 --port 8000
+
+		# Or run the UDP client to push to a Pi (replace <PI_IP>):
+		PYTHONPATH=. python3 tools/joy_net_client.py --host <PI_IP> --port 5005
+		```
+
+		systemd service templates are included in `tools/systemd/` as examples for making the server/client persistent. Edit placeholders (`%USER%`, `%REPO_DIR%`, `<PC_IP>`) before installing to `/etc/systemd/system/`.
+
+
 
 - テスト:
 	- 単体のマッピング関数に対する簡易テストを `tests/test_compute_motor_commands.py` に追加しています。ワークスペースのルートで実行できます:

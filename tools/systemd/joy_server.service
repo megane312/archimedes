@@ -1,0 +1,21 @@
+[Unit]
+Description=Joystick HTTP Server (joy_server.py)
+After=network.target
+
+[Service]
+Type=simple
+User=%USER%
+WorkingDirectory=%REPO_DIR%
+Environment=PYTHONPATH=%REPO_DIR%
+ExecStart=%REPO_DIR%/venv/bin/python3 %REPO_DIR%/tools/joy_server.py --host 0.0.0.0 --port 8000
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+# Notes:
+# - Replace %USER% with your username and %REPO_DIR% with the full path
+#   to the repository (e.g. /home/you/archimedes/ドキュメント).
+# - Save the file to /etc/systemd/system/joy_server.service then run:
+#     sudo systemctl daemon-reload
+#     sudo systemctl enable --now joy_server.service
