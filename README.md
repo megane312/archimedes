@@ -129,3 +129,189 @@ sudo ./run_test.sh
 		```
 
 注意: モータドライバ（MD10C 等）やモータの電源仕様を必ず確認してください。高デューティで両モータを同時に駆動すると大電流が流れるため配線や電源容量に注意が必要です。
+
+
+
+カメラストリーミング
+---------------------------------
+
+Raspberry Pi に接続したカメラの映像をWeb ブラウザでストリーミングするツールです。
+
+### 使用方法
+
+#### 1. カメラ接続の確認（重要）
+
+まず、カメラが正しく接続・有効化されているか診断してください：
+
+```bash
+python3 tools/camera_server.py --diagnose
+```
+
+出力例：
+```
+=== Camera Diagnostic ===
+
+1. Checking rpicam tools...
+   Output: No cameras available!
+
+2. Checking /dev/video* devices...
+   ✓ Found: video0, video1, ...
+
+3. Camera must be enabled in raspi-config
+   Run: sudo raspi-config
+   Go to: Interface Options > Camera > Enable
+
+4. If camera was recently enabled, restart with:
+   sudo reboot
+```
+
+**カメラが見つからない場合の対処:**
+- CSI/DSI ポートにカメラを正しく接続
+- `sudo raspi-config` を実行 → `Interface Options` → `Camera` → `Enable`
+- `sudo reboot` でリスタート
+
+#### 2. ストリーミング開始
+
+カメラが接続されたら、サーバーを起動：
+
+```bash
+# 基本的な起動（ポート8080）
+python3 tools/camera_server.py
+
+# ポートをカスタマイズ
+python3 tools/camera_server.py --port 8081
+
+# 解像度やFPSをカスタマイズ
+python3 tools/camera_server.py --width 800 --height 600 --fps 15
+```
+
+USB カメラ（例: `/dev/video0`）を使う場合は `--type usb` を指定します（`rpicam-hello` の "No cameras available!" は USB カメラでは正常です）：
+
+```bash
+# USB カメラで起動（デバイスを指定）
+python3 tools/camera_server.py --type usb --device /dev/video0 --port 8081 --width 640 --height 360 --fps 30
+```
+
+#### 3. ブラウザでアクセス
+
+ストリーミング開始後、以下のURLをブラウザで開きます：
+
+```
+http://localhost:8080/
+```
+
+ネットワーク上の別マシンからアクセスする場合：
+```
+http://<ラズベリーパイのIP>:8080/
+```
+
+例: `http://192.168.1.50:8080/`
+
+#### 複数カメラの同時ストリーミング
+
+異なるポートで複数起動：
+
+```bash
+# カメラ1: ポート8080
+python3 tools/camera_server.py --port 8080 &
+
+# カメラ2: ポート8081
+python3 tools/camera_server.py --port 8081 &
+
+# カメラ3: ポート8082
+python3 tools/camera_server.py --port 8082 &
+```
+
+USB カメラを複数使う場合の例：
+
+```bash
+# /dev/video0 を 8080 で配信
+python3 tools/camera_server.py --type usb --device /dev/video0 --port 8080 --width 640 --height 360 --fps 30 &
+
+# /dev/video2 を 8081 で配信（存在する場合）
+python3 tools/camera_server.py --type usb --device /dev/video2 --port 8081 --width 640 --height 360 --fps 30 &
+```
+
+自動検出でまとめて起動（推奨）
+---------------------------------
+
+USB カメラを自動検出し、空いているポートに割り当てて起動する補助スクリプトを用意しています。
+
+```bash
+# すべての /dev/video* を検出し、8080 から順番に起動
+python3 tools/start_cameras_auto.py --start-port 8080 --width 640 --height 360 --fps 30
+
+# 2台までに制限して起動
+python3 tools/start_cameras_auto.py --start-port 8080 --limit 2
+
+# 権限が必要な環境なら sudo を付ける
+python3 tools/start_cameras_auto.py --sudo
+```
+
+起動後のアクセス例：
+
+```
+http://<Pi_IP>:8080/
+http://<Pi_IP>:8081/
+...（台数分）
+```
+
+### オプション
+
+```bash
+python3 tools/camera_server.py --help
+```
+
+利用可能なオプション：
+- `--port PORT`: HTTPサーバーのポート（デフォルト: 8080）
+- `--width WIDTH`: フレーム幅（デフォルト: 640）
+- `--height HEIGHT`: フレーム高さ（デフォルト: 360）
+- `--fps FPS`: フレームレート（デフォルト: 30）
+- `--diagnose`: カメラ接続の診断のみ実行
+- `--type {rpi,usb}`: カメラ種別の選択（CSI/libcamera または USB/V4L2）
+- `--device /dev/videoX`: USB カメラデバイス（`--type usb` のとき使用）
+
+### 停止方法
+
+```bash
+# サーバーターミナルで Ctrl+C を押すか：
+pkill -f camera_server.py
+```
+
+### 必要な環境
+
+- Raspberry Pi（Pi 4、Pi 5 等）
+- CSI/DSI カメラ または USB カメラ
+- CSI カメラ利用時: `rpicam-apps` インストール済み
+- USB カメラ利用時: `ffmpeg` インストール済み
+
+インストール：
+```bash
+sudo apt update
+sudo apt install -y rpicam-apps ffmpeg
+```
+
+### トラブルシューティング
+
+**ブラウザに「Camera Connection Error」が表示される：**
+- カメラが物理的に接続されているか確認
+- `python3 tools/camera_server.py --diagnose` で診断
+- `sudo raspi-config` でカメラを有効化
+- `sudo reboot` でリスタート
+
+USB カメラ利用時の補足：
+- `rpicam-hello --list-cameras` が "No cameras available!" を出すのは正常です（CSI カメラ検出用）
+- `/dev/video*` が存在することを確認（例: `/dev/video0`）
+- 起動例: `python3 tools/camera_server.py --type usb --device /dev/video0 --port 8081`
+
+**ストリーミングが遅い：**
+- 解像度を下げる: `--width 480 --height 270`
+- FPSを下げる: `--fps 15`
+- ネットワーク速度を確認
+
+**ポートが使用中というエラー：**
+```bash
+# 既存のプロセスを停止
+pkill -f camera_server
+```
+
